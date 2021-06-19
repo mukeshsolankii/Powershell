@@ -108,9 +108,10 @@ $r = New-Object System.Security.AccessControl.FileSystemAccessRule ("CHEMTURA\$u
 Try{
     $acl.SetAccessRule($r)
     Set-Acl -Path $Path -AclObject $acl
-}Catch{Write-Warning "Error while Setting the access!"}
+    [System.Windows.MessageBox]::show("Success")
+}Catch{[System.Windows.MessageBox]::show("Error! -> while Setting the access!")}
 
-Get-Acl -Path $path | select AccessToString | %{$_.AccessToString.split("`n")}
+#Get-Acl -Path $path | select AccessToString | %{$_.AccessToString.split("`n")}
 }
 
 Function Create-Report{
@@ -132,4 +133,4 @@ $type = $arry[0]
 if($user -eq "" -or $Path -eq ""){[System.Windows.MessageBox]::show("UNID or Path is Blank!")}
 else{[System.Windows.MessageBox]::show("UNID: $user, Path: $Path, Type: $type")}
 
-#Grant-Access
+Grant-Access
