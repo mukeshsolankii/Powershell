@@ -118,14 +118,15 @@ $Form.Dispose()
 
 Function Grant-Access{
 $Acl = (Get-Item $Path).GetAccessControl('Access')
-$r = New-Object System.Security.AccessControl.FileSystemAccessRule ("CHEMTURA\$user",$type,"Allow")
+$r = New-Object System.Security.AccessControl.FileSystemAccessRule ("CHEMTURA\$user","$type","Allow")
 Try{
     $acl.SetAccessRule($r)
     Set-Acl -Path $Path -AclObject $acl
     [System.Windows.MessageBox]::show("Success")
-    # Create-Report
+     Create-Report
 }Catch{[System.Windows.MessageBox]::show("Error! -> while Setting the access!",'SDA',"OK",'Error')
-    # Create-Report
+    $status = "Error"
+     Create-Report
 }
 
 #Get-Acl -Path $path | select AccessToString | %{$_.AccessToString.split("`n")}
@@ -135,29 +136,45 @@ Function Create-Report{
     $outfile = "C:\ScriptingSpace\ShareDriveAccess\Reports\Reports.csv"
 
     if (($c = Test-Path $outfile) -eq $False){
-        {} |Select "Task","UNID","Path","Status","Date" | Export-csv $outfile
+        $newcsv = {} |Select "Task","UNID","Path","Status","Date" | Export-csv $outfile -NoTypeInformation
     }
 
+    $csvfile = @( [pscustomobject]@{
+        "Task" = $task 
+        "UNID" = $user
+        "Path" = $Path
+        "Status" = $status
+        "Date" = date
+    })
+    $csvfile | Export-csv $outfile –Append
+   # Import-Csv $outfile
+}
 
+Function Main{
+
+    $arry = Domain-Form
+    $status = "Success"
+    # unid = "LVKST"
+    $user = $arry[1]
+    # path = "C:\ScriptingSpace"
+    $Path = $arry[2]
+    # Type can be ("FullControl","Modify","ReadAndExecute")
+    $type = $arry[0]
+    #Task 
+    $task = $arry[3]
+    if($user -eq "" -or $Path -eq "" -or $task -eq ""){
+       $x = [System.Windows.MessageBox]::show("UNID ,Path or Task is Blank!",'SDA',"OK",'Warning')
+        Break
+    }
+    else{$check=[System.Windows.MessageBox]::show("UNID: $user, Path: $Path, Type: $type",'SDA',"OKCancel")
+        if($check -eq "Cancel"){
+            [System.Windows.MessageBox]::show("Canceled!",'SDA',"OK",'Warning')
+            break
+        }
+    }
+
+    Grant-Access
 }
 
 
-
-
-$arry = Domain-Form
-
-# unid = "LVKST"
-$user = $arry[1]
-# path = "C:\ScriptingSpace"
-$Path = $arry[2]
-# Type can be ("FullControl","Modify","ReadAndExecute")
-$type = $arry[0]
-#Task 
-$task = $arry[3]
-if($user -eq "" -or $Path -eq "" -or $task -eq ""){
-    [System.Windows.MessageBox]::show("UNID ,Path or Task is Blank!",'SDA',"OK",'Warning')
-    Break
-}
-else{[System.Windows.MessageBox]::show("UNID: $user, Path: $Path, Type: $type")}
-
-Grant-Access
+Main
