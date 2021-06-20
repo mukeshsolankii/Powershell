@@ -10,7 +10,7 @@ $Form.width = 500
 $Form.height = 450
 $Form.Text = ”Share Drive Access Tool"
 # Set the font of the text to be used within the form
-$Font = New-Object System.Drawing.Font("Consolas",12)
+$Font = New-Object System.Drawing.Font("Corbel",12)
 $Form.Font = $Font
 # Create a group that will contain your Text Box (UNID).
 $MyGroupBox1 = New-Object System.Windows.Forms.GroupBox
@@ -66,12 +66,16 @@ $OKButton = new-object System.Windows.Forms.Button
 $OKButton.Location = '130,330'
 $OKButton.Size = '100,40'
 $OKButton.Text = 'OK'
+$OKButton.BackColor = '#0095ff'
+$OKButton.ForeColor = 'white'
 $OKButton.DialogResult=[system.Windows.Forms.DialogResult]::OK
 #Add a cancel button
 $CancelButton = new-object System.Windows.Forms.Button
 $CancelButton.Location = '255,330'
 $CancelButton.Size = '100,40'
 $CancelButton.Text = "Cancel"
+$CancelButton.BackColor = '#ca2c2c'
+$CancelButton.ForeColor = 'white'
 $CancelButton.DialogResult=[system.Windows.Forms.DialogResult]::Cancel
 # Add all the Form controls on one line
 $form.Controls.AddRange(@($MyGroupBox,$OKButton,$CancelButton,$MyGroupBox1,$MyGroupBox2,$MyGroupBox3))
@@ -92,20 +96,21 @@ $dialogResult = $form.ShowDialog()
 if ($dialogResult -eq "OK"){
     $t1 = $textBox1.Text
     $t2 = $textBox2.Text
+    $t3 = $textBox3.Text
 # Check the current state of each radio button and respond accordingly
 if ($RadioButton1.Checked){
-    Write-Warning "FullControl $t1 $t2"
-    return "FullControl",$t1,$t2
+    Write-Warning "FullControl"
+    return "FullControl",$t1,$t2,$t3
     
 }
 elseif ($RadioButton2.Checked){
     Write-Warning "Modify"
-    return "Modify",$t1,$t2
+    return "Modify",$t1,$t2,$t3
     
 }
 elseif ($RadioButton3.Checked){
     Write-Warning "ReadAndExecute"
-    return "ReadAndExecute",$t1,$t2
+    return "ReadAndExecute",$t1,$t2,$t3
 }
 $Form.Dispose()
 }else { break; $Form.Dispose() } 
@@ -118,13 +123,21 @@ Try{
     $acl.SetAccessRule($r)
     Set-Acl -Path $Path -AclObject $acl
     [System.Windows.MessageBox]::show("Success")
-}Catch{[System.Windows.MessageBox]::show("Error! -> while Setting the access!")}
+    # Create-Report
+}Catch{[System.Windows.MessageBox]::show("Error! -> while Setting the access!",'SDA',"OK",'Error')
+    # Create-Report
+}
 
 #Get-Acl -Path $path | select AccessToString | %{$_.AccessToString.split("`n")}
 }
 
 Function Create-Report{
-    
+    $outfile = "C:\ScriptingSpace\ShareDriveAccess\Reports\Reports.csv"
+
+    if (($c = Test-Path $outfile) -eq $False){
+        {} |Select "Task","UNID","Path","Status","Date" | Export-csv $outfile
+    }
+
 
 }
 
@@ -139,7 +152,10 @@ $user = $arry[1]
 $Path = $arry[2]
 # Type can be ("FullControl","Modify","ReadAndExecute")
 $type = $arry[0]
-if($user -eq "" -or $Path -eq ""){[System.Windows.MessageBox]::show("UNID or Path is Blank!")
+#Task 
+$task = $arry[3]
+if($user -eq "" -or $Path -eq "" -or $task -eq ""){
+    [System.Windows.MessageBox]::show("UNID ,Path or Task is Blank!",'SDA',"OK",'Warning')
     Break
 }
 else{[System.Windows.MessageBox]::show("UNID: $user, Path: $Path, Type: $type")}
