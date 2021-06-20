@@ -7,65 +7,74 @@ function Domain-Form{[void] [system.Reflection.Assembly]::LoadWithPartialName("S
 # Set the size of your form
 $Form = New-Object System.Windows.Forms.Form
 $Form.width = 500
-$Form.height = 500
-$Form.Text = ”Share Drive Access"
+$Form.height = 450
+$Form.Text = ”Share Drive Access Tool"
 # Set the font of the text to be used within the form
 $Font = New-Object System.Drawing.Font("Consolas",12)
 $Form.Font = $Font
-# Create a group that will contain your Text Box.
+# Create a group that will contain your Text Box (UNID).
 $MyGroupBox1 = New-Object System.Windows.Forms.GroupBox
-$MyGroupBox1.Location = '40,10'
-$MyGroupBox1.size = '400,80'
-$MyGroupBox1.text = "UNID (sAMAccountName):"
+$MyGroupBox1.Location = '250,140'
+$MyGroupBox1.size = '190,70'
+$MyGroupBox1.text = "UNID:"
 $textBox1 = New-Object System.Windows.Forms.TextBox
 $textBox1.Location = '10,30'
-$textBox1.Size = '380,80'
+$textBox1.Size = '170,80'
 $MyGroupBox1.Controls.Add($textBox1)
-# Create a group that will contain your Text Box.
+# Create a group that will contain your Text Box (Share drive).
 $MyGroupBox2 = New-Object System.Windows.Forms.GroupBox
-$MyGroupBox2.Location = '40,110'
+$MyGroupBox2.Location = '40,40'
 $MyGroupBox2.size = '400,80'
-$MyGroupBox2.text = "Type the Share Drive:"
+$MyGroupBox2.text = "Enter Share Drive Path:"
 $textBox2 = New-Object System.Windows.Forms.TextBox
 $textBox2.Location = '10,30'
 $textBox2.Size = '380,80'
 $MyGroupBox2.Controls.Add($textBox2)
+# Create a group that will contain your Text Box (Task number).
+$MyGroupBox3 = New-Object System.Windows.Forms.GroupBox
+$MyGroupBox3.Location = '250,230'
+$MyGroupBox3.size = '190,70'
+$MyGroupBox3.text = "Enter Task Number:"
+$textBox3 = New-Object System.Windows.Forms.TextBox
+$textBox3.Location = '10,30'
+$textBox3.Size = '170,80'
+$MyGroupBox3.Controls.Add($textBox3)
 # Create a group that will contain your radio buttons
 $MyGroupBox = New-Object System.Windows.Forms.GroupBox
-$MyGroupBox.Location = '40,210'
-$MyGroupBox.size = '400,150'
-$MyGroupBox.text = "Select Type of Access:"
+$MyGroupBox.Location = '40,140'
+$MyGroupBox.size = '200,160'
+$MyGroupBox.text = "Select Access Type:"
 # Create the collection of radio buttons
 $RadioButton1 = New-Object System.Windows.Forms.RadioButton
-$RadioButton1.Location = '20,40'
-$RadioButton1.size = '350,20'
+$RadioButton1.Location = '20,50'
+$RadioButton1.size = '150,20'
 $RadioButton1.Checked = $false
-$RadioButton1.Text = "FullControl"
+$RadioButton1.Text = "Full Access"
 $RadioButton2 = New-Object System.Windows.Forms.RadioButton
-$RadioButton2.Location = '20,70'
-$RadioButton2.size = '350,20'
+$RadioButton2.Location = '20,80'
+$RadioButton2.size = '150,20'
 $RadioButton2.Checked = $true
 $RadioButton2.Text = "Modify"
 $RadioButton3 = New-Object System.Windows.Forms.RadioButton
-$RadioButton3.Location = '20,100'
-$RadioButton3.size = '350,20'
+$RadioButton3.Location = '20,110'
+$RadioButton3.size = '150,20'
 $RadioButton3.Checked = $false
-$RadioButton3.Text = "ReadAndExecute"
+$RadioButton3.Text = "Read Only"
 # Add an OK button
 # Thanks to J.Vierra for simplifing the use of buttons in forms
 $OKButton = new-object System.Windows.Forms.Button
-$OKButton.Location = '130,400'
+$OKButton.Location = '130,330'
 $OKButton.Size = '100,40'
 $OKButton.Text = 'OK'
 $OKButton.DialogResult=[system.Windows.Forms.DialogResult]::OK
 #Add a cancel button
 $CancelButton = new-object System.Windows.Forms.Button
-$CancelButton.Location = '255,400'
+$CancelButton.Location = '255,330'
 $CancelButton.Size = '100,40'
 $CancelButton.Text = "Cancel"
 $CancelButton.DialogResult=[system.Windows.Forms.DialogResult]::Cancel
 # Add all the Form controls on one line
-$form.Controls.AddRange(@($MyGroupBox,$OKButton,$CancelButton,$MyGroupBox1,$MyGroupBox2))
+$form.Controls.AddRange(@($MyGroupBox,$OKButton,$CancelButton,$MyGroupBox1,$MyGroupBox2,$MyGroupBox3))
 # Add all the GroupBox controls on one line
 $MyGroupBox.Controls.AddRange(@($Radiobutton1,$RadioButton2,$RadioButton3))
 # Assign the Accept and Cancel options in the form to the corresponding buttons
@@ -99,7 +108,7 @@ elseif ($RadioButton3.Checked){
     return "ReadAndExecute",$t1,$t2
 }
 $Form.Dispose()
-}
+}else { break; $Form.Dispose() } 
 }
 
 Function Grant-Access{
@@ -130,7 +139,9 @@ $user = $arry[1]
 $Path = $arry[2]
 # Type can be ("FullControl","Modify","ReadAndExecute")
 $type = $arry[0]
-if($user -eq "" -or $Path -eq ""){[System.Windows.MessageBox]::show("UNID or Path is Blank!")}
+if($user -eq "" -or $Path -eq ""){[System.Windows.MessageBox]::show("UNID or Path is Blank!")
+    Break
+}
 else{[System.Windows.MessageBox]::show("UNID: $user, Path: $Path, Type: $type")}
 
 Grant-Access
